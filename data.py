@@ -2,7 +2,11 @@ import requests
 from datetime import date
 from configparser import ConfigParser
 
-SESSION_ID = ConfigParser().read('config.ini')['config']['SESSION_ID']
+config = ConfigParser()
+config.read('config.ini')
+
+
+SESSION_ID = config['config']['SESSION_ID']
 YEAR = 2022
 INPUTS = "./data/"
 
@@ -12,6 +16,7 @@ def load(day: int) -> str:
     assert 0 < day < 26
     s = f"https://adventofcode.com/{YEAR}/day/{day}/input"
     cookies = {"session": SESSION_ID}
+    print(cookies)
 
     resp: requests.Response = requests.get(s, cookies=cookies)
 
