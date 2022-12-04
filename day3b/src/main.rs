@@ -2,14 +2,15 @@ use std::collections::HashSet;
 
 fn main() {
     let mut sum_of_priorities = 0;
-    let data: Vec<_> = include_str!("../../data/3.txt").lines().collect();
-    for k in (0..data.len()).step_by(3) {
-        let a: HashSet<&u8> = HashSet::from_iter(data[k].as_bytes());
-        let b: HashSet<&u8> = HashSet::from_iter(data[k+1].as_bytes());
-        let c: HashSet<&u8> = HashSet::from_iter(data[k+2].as_bytes());
 
-        for &x in a.intersection(&b) {
-            if c.contains(&x) {
+    let data: Vec<HashSet<&u8>> = include_str!("../../data/3.txt")
+        .lines()
+        .map(|row| HashSet::from_iter(row.as_bytes()))
+        .collect();
+
+    for bags in data.chunks_exact(3) {
+        for &x in bags[0].intersection(&bags[1]) {
+            if bags[2].contains(x) {
                 sum_of_priorities += match x {
                     b'a'..=b'z' => 1 + x - b'a',
                     b'A'..=b'Z' => 27 + x - b'A',
@@ -19,7 +20,9 @@ fn main() {
                 } as usize;
                 break;
             }
+            
         }
     }
+
     println!("{}", sum_of_priorities);
 }
