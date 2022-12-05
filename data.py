@@ -16,7 +16,7 @@ def load(day: int) -> str:
     assert 0 < day < 26
     s = f"https://adventofcode.com/{YEAR}/day/{day}/input"
     cookies = {"session": SESSION_ID}
-    print(cookies)
+    # print(cookies)
 
     resp: requests.Response = requests.get(s, cookies=cookies)
 
