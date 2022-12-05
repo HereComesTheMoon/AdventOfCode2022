@@ -24,9 +24,7 @@ std::vector<std::vector<int>> read() {
 inline bool contains(int x1, int x2, int y1, int y2) {
   if (x1 > x2 || y1 > y2) throw "Ohno"; 
 
-  if ((y1 <= x1 && x2 <= y2) || (x1 <= y1 && y2 <= x2)) return true;
-
-  return false;
+  return (y1 <= x1 && x2 <= y2) || (x1 <= y1 && y2 <= x2);
 }
 
 

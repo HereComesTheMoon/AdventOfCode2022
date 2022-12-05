@@ -24,9 +24,7 @@ std::vector<std::vector<int>> read() {
 inline bool overlap(int x1, int x2, int y1, int y2) {
   if (x1 > x2 || y1 > y2) throw "Ohno"; 
 
-  if (x2 < y1 || y2 < x1) return false;
-
-  return true;
+  return !(x2 < y1 || y2 < x1);
 }
 
 

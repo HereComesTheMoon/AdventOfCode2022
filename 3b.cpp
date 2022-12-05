@@ -16,7 +16,7 @@ std::vector<std::string> read() {
   return data;
 }
 
-inline int val(char c) {
+int val(char c) {
   if ('a' <= c && c <= 'z') {
     return 1 + c - 'a';
   }
