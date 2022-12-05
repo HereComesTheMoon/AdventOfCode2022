@@ -21,8 +21,6 @@ const std::map<std::pair<char, char>, uint> round = {
   {std::make_pair('C', 'Z'), 3+3 },
 };
 
-
-
 std::vector<std::pair<char, char>> read() {
   std::ifstream infile("./data/2.txt");
   std::string line;
@@ -37,9 +35,6 @@ std::vector<std::pair<char, char>> read() {
   }
   return data;
 }
-
-
-
 
 int main() {
   auto v = read();
