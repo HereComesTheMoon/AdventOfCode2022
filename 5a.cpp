@@ -6,8 +6,8 @@
 #include <vector>
 #include <tuple>
 
-const uint NUMBER_PILES = 9;
-const std::string INPUT_FILE = "./data/5.txt";
+const uint NUMBER_PILES = 200;
+const std::string INPUT_FILE = "./bigboy/5.txt";
 
 std::vector<std::vector<char>> read_crates() {
   std::ifstream infile(INPUT_FILE);

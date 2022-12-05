@@ -64,16 +64,11 @@ std::vector<std::tuple<uint, uint, uint>> read_instructions() {
 
 void move_crates(std::vector<std::vector<char>> &crates, std::tuple<uint, uint, uint> motion) {
   uint number = std::get<0>(motion);
-  uint from = std::get<1>(motion);
-  uint to = std::get<2>(motion);
+  auto from = &crates[std::get<1>(motion)];
+  auto to = &crates[std::get<2>(motion)];
 
-  for (uint k = 0; k < number; k++) {
-    char crate = crates[from].back();    
-    crates[from].pop_back();
-    crates[to].push_back(crate);
-  }
-
-  std::reverse(crates[to].end() - number, crates[to].end());
+  to->insert(to->end(), from->end() - number, from->end());
+  from->resize(from->size() - number);
 }
 
 int main() {
