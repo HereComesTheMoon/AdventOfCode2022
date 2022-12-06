@@ -7,19 +7,16 @@ import (
 	"runtime"
 )
 
-const FILE = "./../bigboy/6.txt"
-
 func main() {
-	f, err := os.Open(FILE)
+	f, err := os.Open("./../bigboy/6.txt")
 	defer f.Close()
 	if err != nil {
 		panic(err)
 	}
-	// f := strings.NewReader("mjqjpqmgbljsphdztnvjfqwrcgsmlb")
-	solve(f, runtime.NumCPU() + 1)
+	solve(f, runtime.NumCPU()+1)
 }
 
-func solve(input io.Reader, threads int) {
+func solve(input io.Reader, threads int) int {
 	data, err := io.ReadAll(input)
 	if err != nil {
 		panic(err)
@@ -41,10 +38,11 @@ func solve(input io.Reader, threads int) {
 		if result == -1 {
 			continue
 		}
-		fmt.Printf("The first start-of-message marker is at position %d\n", i*chunk_size + result)
-		return
+		fmt.Printf("The first start-of-message marker is at position %d\n", i*chunk_size+result)
+		return i*chunk_size + result
 	}
 
+	return -1
 }
 
 func compute(chunk []byte, ch chan int) {
@@ -67,5 +65,3 @@ func compute(chunk []byte, ch chan int) {
 	}
 	ch <- -1
 }
-
-
