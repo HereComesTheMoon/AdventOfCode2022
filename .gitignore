@@ -52,3 +52,5 @@ Cargo.lock
 config.ini
 issues_with_cpp.md
 bigboy/
+
+!go.mod
