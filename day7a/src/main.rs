@@ -1,35 +1,32 @@
+use std::collections::HashMap;
+
 fn main() {
     println!("Hello, world!");
 
-    let inpt = include_str!("./../../data/7t.sh");
-    let input = parse(&inpt);
+    let inpt = include_str!("./../../data/7.txt");
 
-    for x in input {
-        println!("{:?}", x);
-    }
-    // println!("{:?}", input);
-
+    part1(inpt);
 }
 
 #[derive(Debug)]
-enum File {
-    Dir(String),
-    Bin(usize, String)
+enum File<'a> {
+    Dir(&'a str),
+    Bin(u32, &'a str)
 }
 
 #[derive(Debug)]
-enum Command {
-    LS(Vec<File>),
-    CD(String),
+enum Command<'a> {
+    LS(Vec<File<'a>>),
+    CD(&'a str),
 }
 
 fn parse(input: &'static str) -> impl Iterator<Item = Command> {
     fn parse_file(f: &str) -> File {
         let (a, b) = f.split_once(char::is_whitespace).unwrap();
         if a.starts_with("dir") {
-            File::Dir(b.to_owned())
+            File::Dir(b)
         } else {
-            File::Bin(a.parse().unwrap(), b.to_owned())
+            File::Bin(a.parse().unwrap(), b)
         }
     }
 
@@ -38,9 +35,8 @@ fn parse(input: &'static str) -> impl Iterator<Item = Command> {
         .split("$ ")
         .skip(1)
         .map(|chunk|  chunk.split_at(2) )
-        // .map(|x| {println!("{:?}", x); x} )
         .map(|(cmd, rest)| match cmd {
-            "cd" => { Command::CD(rest.trim().to_owned()) },
+            "cd" => { Command::CD(rest.trim()) },
             "ls" => { Command::LS(
                 rest
                     .trim()
@@ -52,44 +48,45 @@ fn parse(input: &'static str) -> impl Iterator<Item = Command> {
         })
 }
 
-fn part1(input: &'static str) {
+fn part1(input: &'static str) -> u32 {
     let it = parse(input);
-    let mut stack = vec![];
+    let mut parents = vec![];
 
+    let mut sizes:HashMap<Vec<&str>, u32> = HashMap::new();
+    
     for cmd in it {
         match cmd {
-            Command::LS(v) => {},
-            Command::CD("..") => {},
-            Command::CD(dir) => {},
+            Command::LS(files) => {
+                for file in files {
+                    if let File::Bin(size, _) = file {
+                        *sizes.get_mut(&parents).unwrap() += size;
+                    }
+                }
+            },
+            Command::CD("..") => {
+                let size = *sizes.get(&parents).unwrap();
+                parents.pop();
+                *sizes.get_mut(&parents).unwrap() += size;
+            },
+            Command::CD(dir) => {
+                parents.push(dir);
+                sizes.insert(parents.clone(), 0);
+            },
         }
     }
+    while 2 <= parents.len() {
+        let size = *sizes.get(&parents).unwrap();
+        parents.pop();
+        *sizes.get_mut(&parents).unwrap() += size;
+    }
+
+    println!("{:?}", sizes);
+    let res = sizes
+        .drain()
+        .map(|(_,v)| v)
+        .filter(|size| size < &100_000)
+        .sum();
+
+    println!("The result is: {}", res);
+    res
 }
-
-
-
-
-
-
-// "$ cd /
-// $ ls
-// dir a
-// 14848514 b.txt
-// 8504156 c.dat
-// dir d
-// $ cd a
-// $ ls
-// dir e
-// 29116 f
-// 2557 g
-// 62596 h.lst
-// $ cd e
-// $ ls
-// 584 i
-// $ cd ..
-// $ cd ..
-// $ cd d
-// $ ls
-// 4060174 j
-// 8033020 d.log
-// 5626152 d.ext
-// 7214296 k"
