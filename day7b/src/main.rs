@@ -5,8 +5,11 @@ fn main() {
 
     let inpt = include_str!("./../../data/7.txt");
 
-    part1(inpt);
+    part2(inpt);
 }
+
+const TOTAL_SPACE: u32 = 70_000_000;
+const NEEDED_SPACE: u32 = 30_000_000;
 
 #[derive(Debug)]
 enum File<'a> {
@@ -48,7 +51,7 @@ fn parse(input: &'static str) -> impl Iterator<Item = Command> {
         })
 }
 
-fn part1(input: &'static str) -> u32 {
+fn part2(input: &'static str) -> u32 {
     let it = parse(input);
     let mut parents = vec![];
 
@@ -80,11 +83,13 @@ fn part1(input: &'static str) -> u32 {
         *sizes.get_mut(&parents).unwrap() += size;
     }
 
-    println!("{:?}", sizes);
+    let size_needed: u32 = NEEDED_SPACE - (TOTAL_SPACE - *sizes.get(&vec!["/"]).unwrap());
+        
     let res = sizes
         .into_values()
-        .filter(|size| size < &100_000)
-        .sum();
+        .filter(|x| &size_needed <= x)
+        .min()
+        .unwrap();
 
     println!("The result is: {}", res);
     res
