@@ -23,7 +23,7 @@ enum Command<'a> {
     CD(&'a str),
 }
 
-fn parse(input: &'static str) -> impl Iterator<Item = Command> {
+fn parse<'a>(input: &'a str) -> impl Iterator<Item = Command> {
     fn parse_file(f: &str) -> File {
         let (a, b) = f.split_once(char::is_whitespace).unwrap();
         if a.starts_with("dir") {
