@@ -21,9 +21,9 @@ public:
     for (auto &row: gridt) {
       assert(row.size() == gridt[0].size());
     }
-    grid = gridt;
 
-    goal = 'E';
+    grid = gridt;
+    goal = 'a';
 
     dist = std::vector<std::vector<int>>(grid.size());
     for (size_t k = 0; k < grid.size(); ++k) {
@@ -33,10 +33,10 @@ public:
 
     for (size_t y = 0; y < grid.size(); ++y) {
       for (size_t x = 0; x < grid[0].size(); ++x) {
-        if (grid[y][x] == 'S') {
+        if (grid[y][x] == 'E') {
           start = {x, y};
           dist[y][x] = 0;
-          grid[y][x] = 'a';
+          grid[y][x] = 'z';
           next = {start};
           return;
         }
@@ -69,11 +69,11 @@ public:
 
       auto neighbours = get_neighbours(x, y);
       for (auto &[xx, yy]: neighbours) {
-        if (dist[yy][xx] != -1 || grid[y][x] + 1 < grid[yy][xx]) {
+        if (dist[yy][xx] != -1 || grid[yy][xx] + 1 < grid[y][x]) {
           continue;
         }
         if (grid[yy][xx] == goal) {
-          if ('z' <= grid[y][x] + 1) {
+          if (grid[y][x] <= 'a' + 1) {
             std::cout << "Found! x: " << xx << ", y: " << yy << ", Dist: " << dist[y][x] + 1 << std::endl;
             return dist[y][x] + 1;
           } else {
