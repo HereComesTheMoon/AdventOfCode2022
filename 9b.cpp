@@ -34,7 +34,7 @@ struct pair_hash {
 
 class Rope {
 public:
-  Rope(std::vector<std::pair<char, int>> in) {
+  Rope(std::vector<std::pair<char, int>> &in) {
     input = in;
   }
 
@@ -43,14 +43,14 @@ public:
     const int yyy = 100;
 
     std::cout << "[";
-    for (auto [a, b]: rope) {
+    for (auto &[a, b]: rope) {
       std::cout << "(" << a << "," << b << ")";
     }
     std::cout << std::endl;
     for (int y = -yyy; y < yyy; y++) {
       for (int x = -xxx; x < xxx; x++) {
         bool exists = false;
-        for (auto [a, b]: rope) {
+        for (auto &[a, b]: rope) {
           if (a == x && b == y) {
             exists = true;
           }
@@ -64,7 +64,7 @@ public:
   }
 
   auto simulate() {
-    for (auto p: input) {
+    for (const auto &p: input) {
       for (int k = 0; k < p.second; ++k) {
         switch (p.first) {
           case 'U': ++rope[0].second; break;
