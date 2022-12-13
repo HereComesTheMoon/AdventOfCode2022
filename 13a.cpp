@@ -11,8 +11,6 @@
 
 const std::string INPUT_FILE = "./data/13.txt";
 
-typedef std::pair<std::string, std::string> pair;
-
 class Packet;
 
 typedef std::variant<int, std::unique_ptr<Packet>> val;
@@ -21,8 +19,6 @@ size_t get_arg(std::string_view s) {
   assert(s.size() != 0);
   int count = 0;
   for (size_t i = 0; i < s.size(); ++i) {
-    // std::cout << s[i];
-    // std::cout.flush();
     assert (count >= 0);
     switch (s[i]) {
       case '[': ++count; break;
@@ -32,7 +28,6 @@ size_t get_arg(std::string_view s) {
     }
   }
 
-  // assert(false);
   return s.size();
 }
 
@@ -41,10 +36,6 @@ public:
   std::vector<val> content;
 
   Packet(std::string_view s) {
-    // These asserts were just for tests. They should fail in some cases
-    // assert (s.size() != 0);
-    // assert (s[0] != '[');
-    // assert (s.back() != ']');
     content = std::vector<val>();
 
     std::string word;
@@ -53,8 +44,6 @@ public:
     while (i < s.size()) {
       auto j = get_arg(s.substr(i, s.size()));
       auto t = s.substr(i, j);
-      // std::cout << "i: " << i << ", j: " << j << ", t: " << t  << std::endl;
-      // assert("1" == t);
       if (t.at(0) == '[') {
         val value = std::make_unique<Packet>(Packet(t.substr(1, t.size() - 2)));
         content.push_back(std::move(value));
@@ -71,7 +60,6 @@ public:
     std::cout << "[";
     for (size_t i = 0; i < content.size(); ++i) { 
       auto value = &content[i];
-    // for (auto &value: content) {
       if (std::holds_alternative<int>(*value)) {
         std::cout << std::get<int>(*value);
         } else {
@@ -84,12 +72,6 @@ public:
   }
 
   std::weak_ordering operator<=>(const Packet &other) const {
-    // std::cout << std::endl;
-    // std::cout << std::endl;
-    // std::cout << "This:" << std::endl;
-    // (*this).print();
-    // std::cout << std::endl;
-    // other.print();
     for (size_t i = 0; i < std::min(content.size(), other.content.size()); ++i) {
       bool a = std::holds_alternative<int>(content[i]);
       bool b = std::holds_alternative<int>(other.content[i]);
@@ -97,21 +79,17 @@ public:
       if (a && b) {
         comp = std::get<int>(content[i]) <=> std::get<int>(other.content[i]);
       } else if (!a && !b) {
-        // std::cout << "bing bing wahoo" << std::endl;
         comp = *std::get<1>(content[i]) <=> *std::get<1>(other.content[i]);
       } else if (a) {
         Packet temp = Packet(std::to_string(std::get<int>(content[i])));
         comp = temp <=> *std::get<1>(other.content[i]);
-        // comp = temp <=> other;
       } else {
         Packet temp = Packet(std::to_string(std::get<int>(other.content[i])));
         comp = *std::get<1>(content[i]) <=> temp;
-        // comp = *this <=> temp;
       }
       if (comp == 0) continue;
       return comp;
     }
-        // std::cout << "bing bing wahoo" << std::endl;
     return content.size() <=> other.content.size();
   }
 };
@@ -130,44 +108,36 @@ std::vector<std::pair<Packet, Packet>> read() {
   return data;
 }
 
-// std::string_view find_sublist() {
-  
-// }
-
-// int compare(std::string_view l, std::string_view r) {
-  
-// }
-
 void test1() {
   std::string s = "1,1,3,1,1";
   auto i = 0;
   auto j = get_arg(s.substr(i, s.size()));
   auto t = s.substr(i, j);
-  // std::cout << "i: " << i << ", j: " << j << ", t: " << t  << std::endl;
+  std::cout << "i: " << i << ", j: " << j << ", t: " << t  << std::endl;
   assert("1" == t);
 
   i = i + j + 1;
   j = get_arg(s.substr(i, s.size()));
   t = s.substr(i, j);
-  // std::cout << "i: " << i << ", j: " << j << ", t: " << t  << std::endl;
+  std::cout << "i: " << i << ", j: " << j << ", t: " << t  << std::endl;
   assert("1" == t);
 
   i = i + j + 1;
   j = get_arg(s.substr(i, s.size()));
   t = s.substr(i, j);
-  // std::cout << "i: " << i << ", j: " << j << ", t: " << t  << std::endl;
+  std::cout << "i: " << i << ", j: " << j << ", t: " << t  << std::endl;
   assert("3" == t);
 
   i = i + j + 1;
   j = get_arg(s.substr(i, s.size()));
   t = s.substr(i, j);
-  // std::cout << "i: " << i << ", j: " << j << ", t: " << t  << std::endl;
+  std::cout << "i: " << i << ", j: " << j << ", t: " << t  << std::endl;
   assert("1" == t);
 
   i = i + j + 1;
   j = get_arg(s.substr(i, s.size()));
   t = s.substr(i, j);
-  // std::cout << "i: " << i << ", j: " << j << ", t: " << t  << std::endl;
+  std::cout << "i: " << i << ", j: " << j << ", t: " << t  << std::endl;
   assert("1" == t);
 }
 
@@ -177,13 +147,13 @@ void test2() {
   auto i = 0;
   auto j = get_arg(s.substr(i, s.size()));
   auto t = s.substr(i, j);
-  // std::cout << "i: " << i << ", j: " << j << ", t: " << t  << std::endl;
+  std::cout << "i: " << i << ", j: " << j << ", t: " << t  << std::endl;
   assert("[1]" == t);
 
   i = i + j + 1;
   j = get_arg(s.substr(i, s.size()));
   t = s.substr(i, j);
-  // std::cout << "i: " << i << ", j: " << j << ", t: " << t  << std::endl;
+  std::cout << "i: " << i << ", j: " << j << ", t: " << t  << std::endl;
   assert("[2,3,4]" == t);
 }
 
@@ -192,19 +162,19 @@ void test3() {
   auto i = 0;
   auto j = get_arg(s.substr(i, s.size()));
   auto t = s.substr(i, j);
-  // std::cout << "i: " << i << ", j: " << j << ", t: " << t  << std::endl;
+  std::cout << "i: " << i << ", j: " << j << ", t: " << t  << std::endl;
   assert("1" == t);
 
   i = i + j + 1;
   j = get_arg(s.substr(i, s.size()));
   t = s.substr(i, j);
-  // std::cout << "i: " << i << ", j: " << j << ", t: " << t  << std::endl;
+  std::cout << "i: " << i << ", j: " << j << ", t: " << t  << std::endl;
   assert("[2,[3,[4,[5,6,7]]]]" == t);
 
   i = i + j + 1;
   j = get_arg(s.substr(i, s.size()));
   t = s.substr(i, j);
-  // std::cout << "i: " << i << ", j: " << j << ", t: " << t  << std::endl;
+  std::cout << "i: " << i << ", j: " << j << ", t: " << t  << std::endl;
   assert("8" == t);
 }
 int main() {
@@ -218,21 +188,5 @@ int main() {
     }
   }
   std::cout << "Result: " << res << std::endl;
-  // for (auto &[v, w]: input) {
-    // std::cout << std::endl;
-    // v.print();
-    // std::cout << std::endl;
-    // w.print();
-    // std::cout << std::endl;
-    // if (v <= w) {
-    //   std::cout << "\nSmaller: ";
-    //   v.print();
-    // } else {
-    //   std::cout << "\nSmaller: ";
-    //   w.print();
-    // }
-    // }
-  // }
-
   return 0;
 }
