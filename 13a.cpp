@@ -1,13 +1,9 @@
-#include <deque>
 #include <fstream>
 #include <iostream>
 #include <vector>
 #include <assert.h>
-#include <string_view>
-#include <string>
 #include <variant>
 #include <memory>
-#include <compare>
 
 const std::string INPUT_FILE = "./data/13.txt";
 
