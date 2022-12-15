@@ -95,8 +95,7 @@ void merge(std::vector<std::pair<int, int>> &ivs) {
   ivs.resize(i + 1);
 }
 
-std::pair<long long int, long long int>
-find_xy_naive(const std::vector<Scanner> scanners) {
+std::pair<long long int, long long int> find_xy_naive(const std::vector<Scanner> scanners) {
   for (int i = 0; i < BOUND; ++i) {
     auto ivs = get_intervals(scanners, i);
     merge(ivs);
