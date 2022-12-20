@@ -6,99 +6,157 @@
 #include <sstream>
 #include <vector>
 
-#include <unistd.h>
-
-const std::string INPUT_FILE = "./data/20t.txt";
+const std::string INPUT_FILE = "./data/20.txt";
 
 class Node {
 public:
   int val;
-  uint prev;
-  uint next;
+  Node* prev;
+  Node* next;
 
   void print() {
-    printf("Node: { val: %d, prev: %d, next: %d }\n", val, prev, next);
-    // std::cout << "Node: { val: "
+    int a = (prev == nullptr) ? -999 : prev->val;
+    int b = (next == nullptr) ? -999 : next->val;
+    printf("Node: { val: %d, prev: %d, next: %d }\n", val, a, b);
   }
 };
 
-class File {
-public: 
-  std::vector<Node> nodes;
-
-  File(std::vector<Node>&& input) : nodes( std::move ( input )) {}
+class Head {
+public:
+  Node* head;
+  std::vector<Node*> nodes;
 
   void print() {
-    Node n = nodes[0];
-    int start = n.val;
+    Node* n = head;
     do {
-      std::cout << n.val << ", ";
-      // std::cout.flush();
-      n = nodes[n.next];
-    } while (n.val != start);
+      std::cout << n->val << ", ";
+      n = n->next;
+    } while (n != nodes[0]);
     std::cout << std::endl;
   }
 
-  Node walk(Node head, int steps) {
-    // if (steps == 0) return head;
+  Node* walk(Node* node, int steps) {
     while (steps < 0) {
-      head = nodes[head.prev];
+      node = node->prev;
       ++steps;
     }
     while (steps > 0) {
-      head = nodes[head.next];
+      node = node->next;
       --steps;
     }
-    return head;
+    return node;
   }
 
-  Node find(int val) {
-    Node head = nodes[0];
-    while (head.val != val) {
-      head = nodes[head.next];
+  Node* find(int val) {
+    Node* node = head;
+    while (node->val != val) {
+      node = node->next;
     }
-    return head;
+    return node;
   }
 
-  void mix_step(int val) {
-    Node n = find(val);
-    Node other = walk(n, val);
-    if (val == 0) return;
+  void mix_step(uint num) {
+    // Node* n = find(val);
+    // int val = nodes.at(num)->val;
+    Node* n = nodes.at(num);
+    int val = n->val;
+    // std::cout << "val: " << val << " % " << int(nodes.size() - 1) << std::endl;
+    // std::cout << "MOD : " << val % int(nodes.size() - 1) << std::endl;
+    int mod = int(nodes.size() - 1);
+    val = ((val % mod) + mod) % mod;
+    Node* other = walk(n, val);
+    if (other == n) {
+      std::cout << "Hey" << std::endl;
+      return;
+    }
+
+    Node* a = n->prev;
+    Node* b = n->next;
+    a->next = b;
+    b->prev = a;
+    
     if (val < 0) {
-      Node pred = nodes[other.prev];
+      Node* pred = other->prev;
+      pred->next = n;
+      other->prev = n;
+      n->prev = pred;
+      n->next = other;
+    } else {
+      Node* succ = other->next;
+      succ->prev = n;
+      other->next = n;
+      n->prev = other;
+      n->next = succ;
     }
   }
 };
 
-File read() {
+std::vector<int> read_instructions() {
   std::ifstream infile(INPUT_FILE);
+  std::string line;
 
-  std::vector<Node> input;
+  auto data = std::vector<int>();
+  while (std::getline(infile, line)) {
+    data.push_back(std::stoi(line));
+  }
+  
+  return data;
+}
 
+Head read_list() {
+  std::ifstream infile(INPUT_FILE);
   std::string line;
 
   std::getline(infile, line);
-  input.push_back(Node({std::stoi(line), 0, 1}));
+  Node* head = new Node({std::stoi(line), nullptr, nullptr});
 
-  uint i = 1;
+  auto nodes = std::vector<Node*>();
+  nodes.push_back(head);
+  Node* prev = head;
   while (std::getline(infile, line)) {
     int val = std::stoi(line);
-    input.push_back(Node({val,i-1,i+1}));
-    i++;
+    Node* n = new Node({
+      val,
+      prev,
+      nullptr
+    });
+    prev->next = n;
+    prev = n;
+    nodes.push_back(n);
   }
+  head->prev = prev;
+  prev->next = head;
 
-  input[0].prev = input.size() - 1;
-  input.back().next = 0;
-  return input;
+  return Head({head, nodes});
 }
 
 
 int main() {
-  auto data = read();
+  // uint e = 6;
+  // std::cout << (-62) % e << std::endl;
+  
+  auto head = read_list();
 
-  // data.walk();
+  auto instructions = read_instructions();
 
-  int res = 0;
+  head.head->print();
+  // for (const auto& x: instructions) {
+  for (uint x = 0; x < instructions.size(); ++x) {
+    // head.print();
+    head.mix_step(x);
+  }
+
+  head.print();
+
+  auto zero = head.find(0);
+
+  // auto zero = Head({head.find(0)});
+  int a = head.walk(zero, 1000)->val;
+  int b = head.walk(zero, 2000)->val;
+  int c = head.walk(zero, 3000)->val;
+
+
+  int res = a + b + c;
   std::cout << "Result: " << res << std::endl;
   return 0;
 }
