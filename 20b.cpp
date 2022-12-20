@@ -5,6 +5,7 @@
 #include <stdint.h>    
 
 const std::string INPUT_FILE = "./data/20.txt";
+const int64_t KEY = 811589153;
 
 class Node {
 public:
@@ -71,7 +72,7 @@ Head read_list() {
   std::string line;
 
   std::getline(infile, line);
-  Node* head = new Node({std::stoi(line), nullptr, nullptr});
+  Node* head = new Node({std::stoi(line) * KEY, nullptr, nullptr});
 
   auto nodes = std::vector<Node*>();
   nodes.push_back(head);
@@ -79,7 +80,7 @@ Head read_list() {
   while (std::getline(infile, line)) {
     int64_t val = std::stoi(line);
     Node* n = new Node({
-      val,
+      val * KEY,
       prev,
       nullptr
     });
@@ -98,8 +99,10 @@ int main() {
   auto head = read_list();
 
   head.head->print();
-  for (uint x = 0; x < head.nodes.size(); ++x) {
-    head.mix_step(x);
+  for (int i = 0; i < 10; ++i) {
+    for (uint x = 0; x < head.nodes.size(); ++x) {
+      head.mix_step(x);
+    }
   }
 
   head.print();
