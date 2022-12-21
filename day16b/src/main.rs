@@ -23,6 +23,8 @@ impl<'a> WeightedCompleteGraph<'a> {
             if path_e.contains(x) { continue; }
             let d = self.dists[&(*path.last().unwrap(), *x)] + 1;
             if min_left <= d { continue; }
+            
+            let mut single = true;
             for y in self.nodes.iter() {
                 if x == y { continue; }
                 if self.flows[y] == 0 { continue; }    
@@ -30,6 +32,7 @@ impl<'a> WeightedCompleteGraph<'a> {
                 if path_e.contains(y) { continue; }
                 let d_e = self.dists[&(*path_e.last().unwrap(), *y)] + 1;
                 if min_left_e <= d_e { continue; }
+                single = false;
 
                 path.push(x);
                 path_e.push(y);
@@ -38,9 +41,32 @@ impl<'a> WeightedCompleteGraph<'a> {
                 path_e.pop();
                 best_path = best_path.max(self.flows[x] * (min_left - d) + rec + self.flows[y] * (min_left_e - d_e));
             }
+            
+            if single {
+                path.push(x);
+                let rec = self.brute_force_single(path, min_left - d);
+                path.pop();
+                best_path = best_path.max(self.flows[x] * (min_left - d) + rec);
+            }
         }
         return best_path;
     }
+
+    fn brute_force_single(&self, path: &mut Vec<&'a str>, minutes_left: u32) -> u32 {
+        let mut best_path = 0;
+        for x in self.nodes.iter() {
+            if self.flows[x] == 0 { continue; }    
+            if path.contains(x) { continue; }
+            let d = self.dists[&(*path.last().unwrap(), *x)] + 1;
+            if minutes_left <= d { continue; }
+            path.push(x);
+            let rec = self.brute_force_single(path, minutes_left - d);
+            path.pop();
+            best_path = best_path.max(self.flows[x] * (minutes_left - d) + rec);
+        }
+        return best_path;
+    }
+
 }
 
 

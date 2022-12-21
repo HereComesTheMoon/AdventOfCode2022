@@ -15,7 +15,7 @@ impl<'a> WeightedCompleteGraph<'a> {
         WeightedCompleteGraph { nodes, flows, dists }
     }
 
-    fn brute_force_better(&self, path: &mut Vec<&'a str>, minutes_left: u32) -> u32 {
+    fn brute_force(&self, path: &mut Vec<&'a str>, minutes_left: u32) -> u32 {
         let mut best_path = 0;
         for x in self.nodes.iter() {
             if self.flows[x] == 0 { continue; }    
@@ -23,7 +23,7 @@ impl<'a> WeightedCompleteGraph<'a> {
             let d = self.dists[&(*path.last().unwrap(), *x)] + 1;
             if minutes_left <= d { continue; }
             path.push(x);
-            let rec = self.brute_force_better(path, minutes_left - d);
+            let rec = self.brute_force(path, minutes_left - d);
             path.pop();
             best_path = best_path.max(self.flows[x] * (minutes_left - d) + rec);
         }
@@ -120,7 +120,7 @@ fn main() {
 
     let wcg = WeightedCompleteGraph::new(g.nodes, g.flows, g.dists);
 
-    let res = wcg.brute_force_better(&mut vec!["AA"], MINUTES);
+    let res = wcg.brute_force(&mut vec!["AA"], MINUTES);
 
     println!("Result: {}", res);
 }
