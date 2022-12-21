@@ -54,3 +54,6 @@ issues_with_cpp.md
 bigboy/
 
 !go.mod
+
+
+venv/
