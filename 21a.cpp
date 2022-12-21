@@ -11,7 +11,7 @@ const std::string INPUT_FILE = "./data/21.txt";
 
 typedef std::pair<std::string, std::string> Monkey;
 
-bool is_number(std::string s) {
+bool is_number(const std::string& s) {
   for (const auto& c : s) {
     if (!isdigit(c)) {
       return false;
