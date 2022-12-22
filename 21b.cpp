@@ -97,7 +97,7 @@ int64_t simplify(std::string root, int64_t equals) {
       case '*': return simplify(b, equals / aa);
       case '/': assert(false);
       case '-': return simplify(b, aa - equals);
-      default:  assert(false);
+      default :  assert(false);
     }
   } else if (is_number(b)) {
     auto bb = std::stoll(b);
