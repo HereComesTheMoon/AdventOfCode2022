@@ -1,10 +1,10 @@
 #include <fstream>
 #include <iostream>
 #include <vector>
-#include <map>
 #include <assert.h>
 #include <algorithm>
 #include <cmath>
+#include <tuple>
 
 const std::string INPUT_FILE = "./data/22.txt";
 
@@ -19,7 +19,7 @@ public:
   uint y;
   Dir dir = Right;
 
-  Player(Map tm) {
+  Player(const Map& tm) {
     m = tm;
     auto start = std::find(m[0].begin(), m[0].end(), '.');
     if (start == m[0].end()) assert(false);
@@ -93,7 +93,7 @@ public:
     }
   }
 
-  void walk(std::string& directions) {
+  void walk(const std::string& directions) {
     uint i = 0;
     uint j = 0;
     while (j < directions.size()) { 

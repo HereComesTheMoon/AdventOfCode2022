@@ -1,63 +1,52 @@
 #include <fstream>
 #include <iostream>
 #include <vector>
-#include <map>
 #include <assert.h>
 #include <algorithm>
 #include <cmath>
 #include <array>
+#include <tuple>
 
-const std::string INPUT_FILE = "./data/22.txt";
 const uint WIDTH = 50;
 
 typedef std::array<std::array<char, WIDTH>, WIDTH> Side;
 typedef std::array<Side, 6> Map;
 typedef std::array<std::array<std::pair<char, char>, 4>, 6> Edges;
 
-const std::array<std::pair<uint, uint>, 6> pos_side = {{
+const std::string INPUT_FILE = "./data/22.txt";
+
+const std::array<std::pair<uint, uint>, 6> POS_SIDE = {{
     {1*50, 0*50},
     {2*50, 0*50},
     {1*50, 1*50},
     {0*50, 3*50},
     {0*50, 2*50},
     {1*50, 2*50},
-  }};
+}};
+
+const Edges EDGES = { {
+  {{ {2, 0}, {3, 0}, {5, 2}, {4, 1} }},
+  {{ {6, 2}, {3, 1}, {1, 0}, {4, 0} }},
+  {{ {2, 3}, {6, 0}, {5, 3}, {1, 0} }},
+  {{ {6, 3}, {2, 0}, {1, 3}, {5, 0} }},
+  {{ {6, 0}, {4, 0}, {1, 2}, {3, 1} }},
+  {{ {2, 2}, {4, 1}, {5, 0}, {3, 0} }},
+} };
 
 
 enum Dir { Right, Down, Left, Up };
 
-Side side_from_map(std::vector<std::vector<char>>& m, uint x, uint y) {
-  assert(m.at(y).at(x) != ' ');
-  Side side;
-  for (uint j = 0; j < WIDTH; ++j) {
-    for (uint i = 0; i <  WIDTH; ++i) {
-      side.at(j).at(i) = m.at(y + j).at(x + i);
-    }
-  }
-  return side;
-}
-
 class Player {
 public:
   Map m;
-  Edges edges;
   uint s = 0;
   uint x = 0;
   uint y = 0;
   Dir dir = Right;
 
-  Player(Map tm) {
+  Player(const Map& tm) {
     m = tm;
     assert(m[s].at(y).at(x) == '.');
-
-    edges = { {
-      {{ {2, 0}, {3, 0}, {5, 2}, {4, 1} }},
-      {{ {6, 2}, {3, 1}, {1, 0}, {4, 0} }},
-      {{ {2, 3}, {6, 0}, {5, 3}, {1, 0} }},
-      {{ {6, 3}, {2, 0}, {1, 3}, {5, 0} }},
-      {{ {6, 0}, {4, 0}, {1, 2}, {3, 1} }},
-      {{ {2, 2}, {4, 1}, {5, 0}, {3, 0} }},
-    } };
   }
 
   std::tuple<uint, uint, Dir> rotate(uint x, uint y, Dir d, uint number) const {
@@ -100,7 +89,7 @@ public:
       break;
     default: assert(false);
     }
-    auto [side, rotations] = edges.at(s).at(dir);
+    auto [side, rotations] = EDGES.at(s).at(dir);
     side = side - 1;
 
     auto [xr, yr, d] = rotate(xx, yy, dir, rotations);
@@ -136,7 +125,7 @@ public:
     }
   }
 
-  void walk(std::string& directions) {
+  void walk(const std::string& directions) {
     uint i = 0;
     uint j = 0;
     while (j < directions.size()) { 
@@ -171,6 +160,17 @@ public:
   }
 };
 
+Side side_from_map(const std::vector<std::vector<char>>& m, uint x, uint y) {
+  assert(m.at(y).at(x) != ' ');
+  Side side;
+  for (uint j = 0; j < WIDTH; ++j) {
+    for (uint i = 0; i <  WIDTH; ++i) {
+      side.at(j).at(i) = m.at(y + j).at(x + i);
+    }
+  }
+  return side;
+}
+
 std::tuple<Map, std::string> read() {
   std::ifstream infile(INPUT_FILE);
   std::string line;
@@ -197,7 +197,7 @@ std::tuple<Map, std::string> read() {
 
   std::array<Side, 6> cube;
   for (uint i = 0; i < 6; ++i) {
-    cube[i] = side_from_map(map, pos_side[i].first, pos_side[i].second);
+    cube[i] = side_from_map(map, POS_SIDE[i].first, POS_SIDE[i].second);
   }
   return {cube, line};
 }
@@ -211,7 +211,7 @@ int main() {
 
   p.walk(dirs);
 
-  auto res = 1000 * (pos_side[p.s].second + p.y + 1) + 4 * (pos_side[p.s].first + p.x + 1) + p.dir;
+  auto res = 1000 * (POS_SIDE[p.s].second + p.y + 1) + 4 * (POS_SIDE[p.s].first + p.x + 1) + p.dir;
 
   std::cout << "Result: " << res << std::endl;
   return 0;
