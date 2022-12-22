@@ -24,14 +24,11 @@ public:
   std::array<Resources, 4> costs;
 
   void print() const {
-    printf("Id: %d. Cost Ore      robot: {%d,%d,%d,%d}\n", id, costs[0][0],
-           costs[0][1], costs[0][2], costs[0][3]);
-    printf("Id: %d. Cost Clay     robot: {%d,%d,%d,%d}\n", id, costs[1][0],
-           costs[1][1], costs[1][2], costs[1][3]);
-    printf("Id: %d. Cost Obsidian robot: {%d,%d,%d,%d}\n", id, costs[2][0],
-           costs[2][1], costs[2][2], costs[2][3]);
-    printf("Id: %d. Cost Geode    robot: {%d,%d,%d,%d}\n", id, costs[3][0],
-           costs[3][1], costs[3][2], costs[3][3]);
+    printf("Id: %d\n", id);
+    printf("Cost Ore      robot: {%d,%d,%d,%d}\n", costs[0][0], costs[0][1], costs[0][2], costs[0][3]);
+    printf("Cost Clay     robot: {%d,%d,%d,%d}\n", costs[1][0], costs[1][1], costs[1][2], costs[1][3]);
+    printf("Cost Obsidian robot: {%d,%d,%d,%d}\n", costs[2][0], costs[2][1], costs[2][2], costs[2][3]);
+    printf("Cost Geode    robot: {%d,%d,%d,%d}\n", costs[3][0], costs[3][1], costs[3][2], costs[3][3]);
     std::cout << std::endl;
   }
 };
@@ -57,26 +54,41 @@ bool can_afford(const Resources &cost, const State &s) {
   return true;
 }
 
-std::vector<State> branch(const Blueprint &b, const State &s) {
-  auto branches =
-      std::vector<State>({State{s.min + 1,
-                                {s.ores[0] + s.bots[0], s.ores[1] + s.bots[1],
-                                 s.ores[2] + s.bots[2], s.ores[3] + s.bots[3]},
-                                s.bots}});
-
-  for (uint i = 0; i < 4; ++i) {
-    auto cost = b.costs[i];
-    if (can_afford(cost, s)) {
-      auto new_bot = s.bots;
-      ++new_bot[i];
-      branches.emplace_back(State{
-          s.min + 1,
-          {s.ores[0] + s.bots[0] - cost[0], s.ores[1] + s.bots[1] - cost[1],
-           s.ores[2] + s.bots[2] - cost[2], s.ores[3] + s.bots[3] - cost[3]},
-          new_bot,
-      });
-    }
+State build(const Blueprint &b, const State &s, const int i) {
+  if (i == -1) {
+    return State{s.min + 1,
+                 {s.ores[0] + s.bots[0], s.ores[1] + s.bots[1],
+                  s.ores[2] + s.bots[2], s.ores[3] + s.bots[3]},
+                 s.bots};
   }
+  auto new_bot = s.bots;
+  ++new_bot[i];
+  return State{
+      s.min + 1,
+      {s.ores[0] + s.bots[0] - b.costs[i][0],
+       s.ores[1] + s.bots[1] - b.costs[i][1],
+       s.ores[2] + s.bots[2] - b.costs[i][2],
+       s.ores[3] + s.bots[3] - b.costs[i][3]},
+      new_bot,
+  };
+}
+
+std::vector<State> branch(const Blueprint &b, const State &s) {
+  if (can_afford(b.costs[3], s)) {
+    return {{build(b, s, 3)}};
+  }
+  auto branches = std::vector<State>({build(b, s, -1)});
+
+  auto cost = b.costs[2];
+  if (can_afford(cost, s))
+    branches.emplace_back(build(b, s, 2));
+  cost = b.costs[1];
+  if (can_afford(cost, s) && s.bots[1] < std::max({b.costs[0][1], b.costs[1][1], b.costs[2][1], b.costs[3][1]}))
+    branches.emplace_back(build(b, s, 1));
+  cost = b.costs[0];
+  if (can_afford(cost, s) && s.min < (3 * MINUTES / 6) && s.bots[0] < std::max({b.costs[0][0], b.costs[1][0], b.costs[2][0], b.costs[3][0]}))
+    branches.emplace_back(build(b, s, 0));
+
   return branches;
 }
 
@@ -96,19 +108,20 @@ uint bfs(const Blueprint &b) {
       std::cout << "Minute: " << node.min << std::endl;
       max_minute = node.min;
     }
-    // print(node);
     q.pop_front();
     seen.insert({node.ores, node.bots});
-    // std::cout << "Children:" << std::endl;
     for (const auto &s : branch(b, node)) {
       geodes_at_min.at(s.min) = std::max(geodes_at_min[s.min], s.ores[3]);
       // auto number_bots = s.bots[0] + s.bots[1] + s.bots[2] + s.bots[3];
       // bots_at_min[s.min] = std::max(bots_at_min[s.min], number_bots);
 
-      if (s.ores[3] + 0 < geodes_at_min[s.min]) continue;
+      if (s.ores[3] + 0 < geodes_at_min[s.min])
+        continue;
 
-      // if (number_bots + 2 < bots_at_min[s.min] || s.ores[3] + 2 < geodes_at_min[s.min]) { continue; }
-      if (seen.contains({s.ores, s.bots})) continue;
+      // if (number_bots + 2 < bots_at_min[s.min] || s.ores[3] + 2 <
+      // geodes_at_min[s.min]) { continue; }
+      if (seen.contains({s.ores, s.bots}))
+        continue;
       if (s.min == MINUTES)
         continue;
       q.push_back(s);
@@ -118,23 +131,21 @@ uint bfs(const Blueprint &b) {
   return geodes_at_min.back();
 }
 
-void simulate(const Blueprint& b) {
+void simulate(const Blueprint &b) {
   auto s = State{0, {{0, 0, 0, 0}}, {{1, 0, 0, 0}}};
   int inp;
   print(s);
   while (s.min < MINUTES) {
-    // bool valid = false;
     while (true) {
       inp = getchar();
-      if (inp == '\n') continue;
+      if (inp == '\n')
+        continue;
       if (inp == '5') {
-        s = State{s.min + 1, {s.ores[0] + s.bots[0],s.ores[1] + s.bots[1],s.ores[2] + s.bots[2],s.ores[3] + s.bots[3]}, s.bots};
+        s = build(b, s, -1);
         break;
       } else if ('1' <= inp && inp <= '4') {
         if (can_afford(b.costs[inp - '1'], s)) {
-          auto new_bot = s.bots;
-          new_bot[inp - '1']++;
-          s = State{s.min + 1, {s.ores[0] - b.costs[inp - '1'][0] + s.bots[0],s.ores[1] - b.costs[inp - '1'][1] + s.bots[1],s.ores[2] - b.costs[inp - '1'][2] + s.bots[2],s.ores[3] - b.costs[inp - '1'][3] + s.bots[3]}, new_bot};
+          s = build(b, s, inp - '1');
           break;
         } else {
           std::cout << "Can't afford!" << std::endl;
@@ -145,7 +156,6 @@ void simulate(const Blueprint& b) {
     }
     print(s);
   }
-
 }
 
 std::vector<Blueprint> read() {
@@ -165,20 +175,21 @@ std::vector<Blueprint> read() {
       vals.at(count) = std::stoi(i->str());
       ++count;
     }
-    data.emplace_back(Blueprint{int(vals[0]),
-                                {{
-                                    {vals[1], 0, 0, 0},
-                                    {vals[2], 0, 0, 0},
-                                    {vals[3], vals[4], 0, 0},
-                                    {vals[5], 0, vals[6], 0},
-                                }}});
+    auto bp = Blueprint{int(vals[0]),
+                        {{
+                            {vals[1], 0, 0, 0},
+                            {vals[2], 0, 0, 0},
+                            {vals[3], vals[4], 0, 0},
+                            {vals[5], 0, vals[6], 0},
+                        }}};
+    data.emplace_back(bp);
   }
   return data;
 }
 
-uint check_quality(const std::vector<Blueprint>& data) {
+uint check_quality(const std::vector<Blueprint> &data) {
   auto quality_sum = 0;
-  for (const auto& b : data) {
+  for (const auto &b : data) {
     std::cout << "Checking blueprint " << b.id << std::endl;
     b.print();
     auto geodes = bfs(b);
