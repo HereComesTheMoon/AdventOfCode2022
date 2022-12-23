@@ -8,7 +8,7 @@
 #include <vector>
 
 const std::string INPUT_FILE = "./data/19.txt";
-const uint MINUTES = 24;
+const uint MINUTES = 32;
 
 // Ore, Clay, Obsidian, Geode
 typedef std::array<uint, 4> Resources;
@@ -20,14 +20,10 @@ public:
 
   void print() const {
     printf("Id: %d\n", id);
-    printf("Cost Ore      robot: {%d,%d,%d,%d}\n", costs[0][0], costs[0][1],
-           costs[0][2], costs[0][3]);
-    printf("Cost Clay     robot: {%d,%d,%d,%d}\n", costs[1][0], costs[1][1],
-           costs[1][2], costs[1][3]);
-    printf("Cost Obsidian robot: {%d,%d,%d,%d}\n", costs[2][0], costs[2][1],
-           costs[2][2], costs[2][3]);
-    printf("Cost Geode    robot: {%d,%d,%d,%d}\n", costs[3][0], costs[3][1],
-           costs[3][2], costs[3][3]);
+    printf("Cost Ore      robot: {%d,%d,%d,%d}\n", costs[0][0], costs[0][1], costs[0][2], costs[0][3]);
+    printf("Cost Clay     robot: {%d,%d,%d,%d}\n", costs[1][0], costs[1][1], costs[1][2], costs[1][3]);
+    printf("Cost Obsidian robot: {%d,%d,%d,%d}\n", costs[2][0], costs[2][1], costs[2][2], costs[2][3]);
+    printf("Cost Geode    robot: {%d,%d,%d,%d}\n", costs[3][0], costs[3][1], costs[3][2], costs[3][3]);
     std::cout << std::endl;
   }
 };
@@ -82,14 +78,10 @@ std::vector<State> branch(const Blueprint &b, const State &s) {
   if (can_afford(cost, s))
     branches.emplace_back(build(b, s, 2));
   cost = b.costs[1];
-  if (can_afford(cost, s) &&
-      s.bots[1] < std::max({b.costs[0][1], b.costs[1][1], b.costs[2][1],
-                            b.costs[3][1]}))
+  if (can_afford(cost, s) && s.bots[1] < std::max({b.costs[0][1], b.costs[1][1], b.costs[2][1], b.costs[3][1]}))
     branches.emplace_back(build(b, s, 1));
   cost = b.costs[0];
-  if (can_afford(cost, s) && s.min < (3 * MINUTES / 6) &&
-      s.bots[0] < std::max({b.costs[0][0], b.costs[1][0], b.costs[2][0],
-                            b.costs[3][0]}))
+  if (can_afford(cost, s) && s.bots[0] < std::max({b.costs[0][0], b.costs[1][0], b.costs[2][0], b.costs[3][0]}))
     branches.emplace_back(build(b, s, 0));
 
   return branches;
@@ -114,7 +106,7 @@ uint bfs(const Blueprint &b) {
     for (const auto &s : branch(b, node)) {
       geodes_at_min.at(s.min) = std::max(geodes_at_min[s.min], s.ores[3]);
 
-      if (s.ores[3] + 0 < geodes_at_min[s.min])
+      if (s.ores[3] + 1 < geodes_at_min[s.min])
         continue;
 
       if (seen.contains({s.ores, s.bots}))
@@ -162,7 +154,8 @@ std::vector<Blueprint> read() {
   auto data = std::vector<Blueprint>();
 
   std::regex numbers("-?\\d+");
-  while (std::getline(infile, line)) {
+  for (uint i = 0; i < 3; ++i) {
+    std::getline(infile, line);
     auto begin = std::sregex_iterator(line.begin(), line.end(), numbers);
     auto end = std::sregex_iterator();
     auto vals = std::array<uint, 7>();
@@ -172,35 +165,35 @@ std::vector<Blueprint> read() {
       vals.at(count) = std::stoi(i->str());
       ++count;
     }
-    data.emplace_back(Blueprint{int(vals[0]),
-                                {{
-                                    {vals[1], 0, 0, 0},
-                                    {vals[2], 0, 0, 0},
-                                    {vals[3], vals[4], 0, 0},
-                                    {vals[5], 0, vals[6], 0},
-                                }}});
+    auto bp = Blueprint{int(vals[0]),
+                        {{
+                            {vals[1], 0, 0, 0},
+                            {vals[2], 0, 0, 0},
+                            {vals[3], vals[4], 0, 0},
+                            {vals[5], 0, vals[6], 0},
+                        }}};
+    data.emplace_back(bp);
   }
   return data;
 }
 
-uint check_quality(const std::vector<Blueprint> &data) {
-  auto quality_sum = 0;
+uint crack_geodes(const std::vector<Blueprint> &data) {
+  auto res = 1;
   for (const auto &b : data) {
     std::cout << "Checking blueprint " << b.id << std::endl;
     b.print();
     auto geodes = bfs(b);
     std::cout << "Geodes cracked open: " << geodes << std::endl;
-    std::cout << "Quality level: " << geodes * b.id << std::endl;
-    quality_sum += geodes * b.id;
+    res *= geodes;
   }
 
-  std::cout << "Total quality: " << quality_sum << std::endl;
-  return quality_sum;
+  std::cout << "Total quality: " << res << std::endl;
+  return res;
 }
 
 int main() {
   auto data = read();
 
-  check_quality(data);
+  crack_geodes(data);
   return 0;
 }
