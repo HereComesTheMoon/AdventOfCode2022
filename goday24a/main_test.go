@@ -18,20 +18,20 @@ func Test_gcd(t *testing.T) {
 
 func Test_queue(t *testing.T) {
 	q := Queue{}
-	q.push([3]uint{0,0,0})
-	q.push([3]uint{1,1,1})
-	q.push([3]uint{2,2,2})
-	if q.pop() != [3]uint{0,0,0} {
+	q.Push([3]uint{0,0,0})
+	q.Push([3]uint{1,1,1})
+	q.Push([3]uint{2,2,2})
+	if q.Pop() != [3]uint{0,0,0} {
 		t.Fail()
 	}
-	if q.pop() != [3]uint{1,1,1} {
+	if q.Pop() != [3]uint{1,1,1} {
 		t.Fail()
 	}
-	if q.pop() != [3]uint{2,2,2} {
+	if q.Pop() != [3]uint{2,2,2} {
 		t.Fail()
 	}
-	q.push([3]uint{0,0,0})
-	if q.pop() != [3]uint{0,0,0} {
+	q.Push([3]uint{0,0,0})
+	if q.Pop() != [3]uint{0,0,0} {
 		t.Fail()
 	}
 }
