@@ -1,0 +1,6 @@
+1. No assert statement. The best you can do is an if and a panic, which is cumbersome as hell
+2. Why does the built-in len() command return a SIGNED integer? Go's typesystem is incredibly limited. It's very C-like, and not in a good way
+3. No algebraic types whatsoever. This is honestly the biggest one, and where a lot of its issues stem from: Cumbersome error handling (and the special case (value, error) return)
+4. Why can you do func foo(x, y, z int) ? This is unnecessary for a supposedly simple language
+5. There are far too many ways of allocating values: &T{...}, new, make
+6. Deep copying a slice is terrible. In general it's a huge footgun, and you absolutely need to be careful when handling slices of slices. C++'s worst case of "everything is passed by value" is bad, but so is the C issue where everything is a pointer. If the language has certain 'elevated' special types (eg. slice and map in Go) then it should ensure these neatly interact with one another, and that deep copying slices of slices is not a pain
